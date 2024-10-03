@@ -1512,6 +1512,8 @@ void PlayerbotAI::DoNextAction(bool min)
                         botAI->ResetStrategies();
                         botAI->Reset();
                     }
+                    if (!bot->inRandomLfgDungeon() && !bot->IsBeingTeleported() && bot->IsInWorld())
+                        sLFGMgr->TeleportPlayer(bot, 0);
                 }
             Player* lfgleader = bot->GetGroup()->GetLeader();
             if (!bot->GetMap()->IsDungeon() && !bot->IsBeingTeleported() && !lfgleader->IsBeingTeleported() &&
