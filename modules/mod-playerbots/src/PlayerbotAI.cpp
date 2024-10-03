@@ -369,6 +369,12 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     {
         Group* group = bot->GetGroup();
         Player* leader = bot->GetGroup()->GetLeader();
+        if (!HasRealPlayerMaster() || !leader)
+        {
+            bot->RemoveFromGroup();
+            GET_PLAYERBOT_AI(bot)->SetMaster(nullptr);
+            ResetStrategies();
+        }
         if (group && leader &&
             (leader->isAFK() || !leader->GetSession() || GET_PLAYERBOT_AI(leader) || !HasRealPlayerMaster() ||
              !master || !master->IsInWorld()))
