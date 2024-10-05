@@ -61,7 +61,6 @@ public:
         creators["emote"] = &StrategyContext::emote;
         creators["passive"] = &StrategyContext::passive;
         creators["save mana"] = &StrategyContext::auto_save_mana;
-        creators["smana"] = &StrategyContext::auto_save_mana;
         creators["food"] = &StrategyContext::food;
         creators["chat"] = &StrategyContext::chat;
         creators["default"] = &StrategyContext::world_packet;

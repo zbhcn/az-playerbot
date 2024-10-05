@@ -129,6 +129,7 @@ public:
             str = str.substr(1);
         if (str.back() == '"')
             str = str.substr(0, str.size() - 1);
+
         QueryResult result = WorldDatabase.Query("SELECT entry FROM creature_template WHERE name = \"{}\" LIMIT 1", str);
         if (!result)
         {

@@ -86,12 +86,15 @@ void AvoidAoeStrategy::InitMultipliers(std::vector<Multiplier*>& multipliers)
 }
 
 TankFaceStrategy::TankFaceStrategy(PlayerbotAI* botAI) : Strategy(botAI) {}
+
 NextAction** TankFaceStrategy::getDefaultActions()
 {
     return NextAction::array(0, new NextAction("tank face", ACTION_MOVE), nullptr);
 }
-void TankFaceStrategy::InitTriggers(std::vector<TriggerNode*>& triggers) {}
 
+void TankFaceStrategy::InitTriggers(std::vector<TriggerNode*>& triggers)
+{
+}
 
 NextAction** CombatFormationStrategy::getDefaultActions()
 {

@@ -104,43 +104,11 @@ public:
 
         unbalanced_times = 0;
         m_objects.fastClear();
-        //m_obj2Idx.getKeys(m_objects);
-            // 重新填充 m_objects，确保 m_obj2Idx 内部是有效的,防止宕机
-        if (m_obj2Idx.size() > 0)
-        {
-            m_obj2Idx.getKeys(m_objects);
-        }
-        else
-        {
-            // 添加断言或日志
-            assert(false && "m_obj2Idx is empty!");
-            return;
-        }
-        //m_objects_to_push.getMembers(m_objects);
-            // 检查 m_objects_to_push 的有效性
-        if (m_objects_to_push.size() > 0)
-        {
-            m_objects_to_push.getMembers(m_objects);
-        }
-        else
-        {
-            // 添加断言或日志
-            assert(false && "m_objects_to_push is empty!");
-            return;
-        }
+        m_obj2Idx.getKeys(m_objects);
+        m_objects_to_push.getMembers(m_objects);
         //assert that m_obj2Idx has all the keys
-            // 在构建 BIH 树之前确保 m_objects 是有效的
-        if (m_objects.size() > 0)
-        {
-            m_tree.build(m_objects, BoundsFunc::GetBounds2);
-        }
-        else
-        {
-            // 添加断言或日志
-            assert(false && "m_objects is empty after push!");
-        }
 
-        //m_tree.build(m_objects, BoundsFunc::GetBounds2);
+        m_tree.build(m_objects, BoundsFunc::GetBounds2);
     }
 
     template<typename RayCallback>

@@ -165,7 +165,7 @@ public:
             // 6 rooms, 8 soldiers, 3 abominations and 1 weaver in each room | middle positions in table starts from 6
             for (uint8 i = 6; i < 12; ++i)
             {
-                for (uint8 j = 0; j < 8; ++j)
+                for (uint8 j = 0; j < 4; ++j)//从8个骷髅改为4个
                 {
                     float angle = M_PI * 2 / 8 * j;
                     me->SummonCreature(NPC_SOLDIER_OF_THE_FROZEN_WASTES, SummonGroups[i].GetPositionX() + 6 * cos(angle), SummonGroups[i].GetPositionY() + 6 * std::sin(angle), SummonGroups[i].GetPositionZ(), SummonGroups[i].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
@@ -173,20 +173,21 @@ public:
             }
             for (uint8 i = 6; i < 12; ++i)
             {
-                for (uint8 j = 1; j < 4; ++j)
-                {
-                    float dist = j == 2 ? 0.0f : 8.0f; // second in middle
-                    float angle = SummonGroups[i].GetOrientation() + M_PI * 2 / 4 * j;
+                //for (uint8 j = 1; j < 2; ++j)//从4个胖子改成1个胖子
+                //{
+                    //float dist = j == 2 ? 0.0f : 8.0f; // second in middle
+                    float dist = 8.0f;//胖子不再刷新在中间只刷在四周
+                    float angle = SummonGroups[i].GetOrientation() + M_PI * 2 / 4 * 2;//j改为了2
                     me->SummonCreature(NPC_UNSTOPPABLE_ABOMINATION, SummonGroups[i].GetPositionX() + dist * cos(angle), SummonGroups[i].GetPositionY() + dist * std::sin(angle), SummonGroups[i].GetPositionZ(), SummonGroups[i].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                }
+                //}
             }
             for (uint8 i = 6; i < 12; ++i)
             {
-                for (uint8 j = 0; j < 1; ++j)
-                {
+                //for (uint8 j = 0; j < 1; ++j)//改成1个织魂者
+                //{
                     float angle = SummonGroups[i].GetOrientation() + M_PI;
                     me->SummonCreature(NPC_SOUL_WEAVER, SummonGroups[i].GetPositionX() + 6 * cos(angle), SummonGroups[i].GetPositionY() + 6 * std::sin(angle), SummonGroups[i].GetPositionZ() + 0.5f, SummonGroups[i].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                }
+                //}
             }
         }
 

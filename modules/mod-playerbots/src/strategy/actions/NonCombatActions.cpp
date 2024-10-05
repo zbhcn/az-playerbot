@@ -46,7 +46,15 @@ bool DrinkAction::Execute(Event event)
 
         botAI->SetNextCheckDelay(delay);
 
-        bot->AddAura(24707, bot);
+        //bot->AddAura(24707, bot);
+        bot->AddAura(25990, bot);
+        if (bot->GetGroup())
+        {
+            if (botAI->IsHeal(bot))
+                botAI->SayToParty("别开,治疗没蓝!!!");
+            else
+                botAI->SayToParty("别开,我在恢复!");
+        }
         return true;
         // return botAI->CastSpell(24707, bot);
     }
