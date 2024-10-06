@@ -53,7 +53,6 @@
 #include "StringConvert.h"
 #include "Tokenize.h"
 #include "Transport.h"
-#include "UpdateMask.h"
 #include "Util.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -1033,35 +1032,6 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
                     break;
                 default:
                     break;
-            }
-
-            repMgr.SendStates();
-        }
-        //使机器人声望满
-        if (pCurrChar->ToPlayer()->GetSession()->IsBot() && pCurrChar->GetReputation(571) < 42990)
-        {
-            ReputationMgr& repMgr = pCurrChar->GetReputationMgr();
-
-            auto SendFullReputation = [&repMgr](std::initializer_list<uint32> factionsList)
-                {
-                    for (auto const& itr : factionsList)
-                    {
-                        repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(itr), 42999.f, false);
-                    }
-                };
-
-            SendFullReputation({ 942, 935, 936, 1011, 970, 967, 989, 932, 934, 1038, 1077, 1106, 1104, 1090, 1098, 1156, 1073, 1105, 1119, 1091 });
-
-            switch (pCurrChar->GetFaction())
-            {
-            case ALLIANCE:
-                SendFullReputation({ 72, 47, 69, 930, 730, 978, 54, 946, 1037, 1068, 1126, 1094, 1050 });
-                break;
-            case HORDE:
-                SendFullReputation({ 76, 68, 81, 911, 729, 941, 530, 947, 1052, 1067, 1124, 1064, 1085 });
-                break;
-            default:
-                break;
             }
 
             repMgr.SendStates();

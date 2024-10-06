@@ -62,6 +62,7 @@ void GuardAI::JustDied(Unit* killer)
 {
     if (!killer)
         return;
+
     if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
         me->SendZoneUnderAttackMessage(player);
 }

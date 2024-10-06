@@ -25,7 +25,7 @@ float EstimatedLifetimeValue::Calculate()
 
 float EstimatedGroupDpsValue::Calculate()
 {
-    float totalDps = 0.0f;  // 初始化 totalDps 为 0.0
+    float totalDps = 0;
 
     std::vector<Player*> groupPlayer = {bot};
     if (Group* group = bot->GetGroup())

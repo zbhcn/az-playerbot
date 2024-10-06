@@ -827,11 +827,12 @@ bool MovementAction::ReachCombatTo(Unit* target, float distance)
     float shortenTo = distance;
 
     // Avoid walking too far when moving towards each other
-    if (bot->GetDistance(tx, ty, tz) >= 10.0f)
-        shortenTo = std::max(distance, bot->GetDistance(tx, ty, tz) / 2);
+    float disToGo = bot->GetExactDist(tx, ty, tz) - distance;
+    if (disToGo >= 10.0f)
+        shortenTo = disToGo / 2 + distance;
 
-    if (bot->GetExactDist(tx, ty, tz) <= shortenTo)
-        return false;
+    // if (bot->GetExactDist(tx, ty, tz) <= shortenTo)
+    //     return false;
 
     path.ShortenPathUntilDist(G3D::Vector3(tx, ty, tz), shortenTo);
     G3D::Vector3 endPos = path.GetPath().back();
@@ -963,20 +964,6 @@ void MovementAction::UpdateMovementState()
         (!bot->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || onGround))
     {
         bot->RemoveUnitMovementFlag(MOVEMENTFLAG_FLYING);
-    }
-    Transport* newTransport = bot->GetMap()->GetTransportForPos(bot->GetPhaseMask(), bot->GetPositionX(),
-                                                                bot->GetPositionY(), bot->GetPositionZ(), bot);
-    if (newTransport != bot->GetTransport())
-    {
-        LOG_DEBUG("playerbots", "Bot {} is on a transport", bot->GetName());
-
-        if (bot->GetTransport())
-            bot->GetTransport()->RemovePassenger(bot, true);
-
-        if (newTransport)
-            newTransport->AddPassenger(bot, true);
-
-        bot->StopMovingOnCurrentPos();
     }
 
     bot->SendMovementFlagUpdate();
@@ -1894,7 +1881,7 @@ bool AvoidAoeAction::AvoidGameObjectWithDamage()
             continue;
         }
 
-        float radius = (float)goInfo->trap.diameter / 2;
+        float radius = (float)goInfo->trap.diameter / 2 + go->GetCombatReach();
         if (!radius || radius > sPlayerbotAIConfig->maxAoeAvoidRadius)
             continue;
 
@@ -2219,10 +2206,13 @@ Position CombatFormationMoveAction::AverageGroupPos(float dis, bool ranged, bool
         Player* member = ObjectAccessor::FindPlayer(itr->guid);
         if (!member)
             continue;
+
         if (!self && member == bot)
             continue;
+
         if (ranged && !PlayerbotAI::IsRanged(member))
             continue;
+
         if (!member->IsAlive() || member->GetMapId() != bot->GetMapId() || member->IsCharmed() ||
             sServerFacade->GetDistance2d(bot, member) > dis)
             continue;
@@ -2254,24 +2244,31 @@ float CombatFormationMoveAction::AverageGroupAngle(Unit* from, bool ranged, bool
         Player* member = ObjectAccessor::FindPlayer(itr->guid);
         if (!member)
             continue;
+
         if (!self && member == bot)
             continue;
+
         if (ranged && !PlayerbotAI::IsRanged(member))
             continue;
+
         if (!member->IsAlive() || member->GetMapId() != bot->GetMapId() || member->IsCharmed() ||
             sServerFacade->GetDistance2d(bot, member) > sPlayerbotAIConfig->sightDistance)
             continue;
+
         cnt++;
         sumX += member->GetPositionX() - from->GetPositionX();
         sumY += member->GetPositionY() - from->GetPositionY();
     }
     if (cnt == 0)
         return 0.0f;
+
     // unnecessary division
     // sumX /= cnt;
     // sumY /= cnt;
+
     return atan2(sumY, sumX);
 }
+
 Position CombatFormationMoveAction::GetNearestPosition(const std::vector<Position>& positions)
 {
     Position result;
@@ -2313,32 +2310,40 @@ bool TankFaceAction::Execute(Event event)
     Unit* target = AI_VALUE(Unit*, "current target");
     if (!target)
         return false;
+
     if (!bot->GetGroup())
         return false;
-    if (!bot->IsWithinMeleeRange(target))
-        return false;
-    if (!AI_VALUE2(bool, "has aggro", "current target"))
+
+    if (!bot->IsWithinMeleeRange(target) || target->isMoving())
         return false;
 
+    if (!AI_VALUE2(bool, "has aggro", "current target"))
+        return false;
+    
     float averageAngle = AverageGroupAngle(target, true);
+
     if (averageAngle == 0.0f)
         return false;
+
     float deltaAngle = Position::NormalizeOrientation(averageAngle - target->GetAngle(bot));
     if (deltaAngle > M_PI)
-        deltaAngle -= 2.0f * M_PI;  // -PI..PI
+        deltaAngle -= 2.0f * M_PI; // -PI..PI
+
     float tolerable = M_PI_2;
+
     if (fabs(deltaAngle) > tolerable)
         return false;
+
     float goodAngle1 = Position::NormalizeOrientation(averageAngle + M_PI * 3 / 5);
     float goodAngle2 = Position::NormalizeOrientation(averageAngle - M_PI * 3 / 5);
+
     // if dist < bot->GetMeleeRange(target) / 2, target will move backward
-    float dist = std::max(bot->GetExactDist(target), bot->GetMeleeRange(target) / 2) - bot->GetCombatReach() -
-                 target->GetCombatReach();
+    float dist = std::max(bot->GetExactDist(target), bot->GetMeleeRange(target) / 2) - bot->GetCombatReach() - target->GetCombatReach();
     std::vector<Position> availablePos;
     float x, y, z;
     target->GetNearPoint(bot, x, y, z, 0.0f, dist, goodAngle1);
-    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(),
-                                                       bot->GetPositionZ(), x, y, z))
+    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 
+        x, y, z))
     {
         /// @todo: movement control now is a mess, prepare to rewrite
         std::list<FleeInfo>& infoList = AI_VALUE(std::list<FleeInfo>&, "recently flee info");
@@ -2350,8 +2355,8 @@ bool TankFaceAction::Execute(Event event)
         }
     }
     target->GetNearPoint(bot, x, y, z, 0.0f, dist, goodAngle2);
-    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(),
-                                                       bot->GetPositionZ(), x, y, z))
+    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 
+        x, y, z))
     {
         std::list<FleeInfo>& infoList = AI_VALUE(std::list<FleeInfo>&, "recently flee info");
         Position pos(x, y, z);
@@ -2364,8 +2369,7 @@ bool TankFaceAction::Execute(Event event)
     if (availablePos.empty())
         return false;
     Position nearest = GetNearestPosition(availablePos);
-    return MoveTo(bot->GetMapId(), nearest.GetPositionX(), nearest.GetPositionY(), nearest.GetPositionZ(), false, false,
-                  false, true, MovementPriority::MOVEMENT_COMBAT);
+    return MoveTo(bot->GetMapId(), nearest.GetPositionX(), nearest.GetPositionY(), nearest.GetPositionZ(), false, false, false, true, MovementPriority::MOVEMENT_COMBAT);
 }
 
 bool DisperseSetAction::Execute(Event event)
@@ -2510,12 +2514,12 @@ bool SetBehindTargetAction::Execute(Event event)
     if (target->GetVictim() == bot)
         return false;
 
-    if (!bot->IsWithinMeleeRange(target))
+    if (!bot->IsWithinMeleeRange(target) || target->isMoving())
         return false;
 
     float deltaAngle = Position::NormalizeOrientation(target->GetOrientation() - target->GetAngle(bot));
     if (deltaAngle > M_PI)
-        deltaAngle -= 2.0f * M_PI;  // -PI..PI
+        deltaAngle -= 2.0f * M_PI; // -PI..PI
 
     float tolerable = M_PI_2;
 
@@ -2524,13 +2528,13 @@ bool SetBehindTargetAction::Execute(Event event)
 
     float goodAngle1 = Position::NormalizeOrientation(target->GetOrientation() + M_PI * 3 / 5);
     float goodAngle2 = Position::NormalizeOrientation(target->GetOrientation() - M_PI * 3 / 5);
-    float dist = std::max(bot->GetExactDist(target), bot->GetMeleeRange(target) / 2) - bot->GetCombatReach() -
-                 target->GetCombatReach();
+
+    float dist = std::max(bot->GetExactDist(target), bot->GetMeleeRange(target) / 2) - bot->GetCombatReach() - target->GetCombatReach();
     std::vector<Position> availablePos;
     float x, y, z;
     target->GetNearPoint(bot, x, y, z, 0.0f, dist, goodAngle1);
-    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(),
-                                                       bot->GetPositionZ(), x, y, z))
+    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 
+        x, y, z))
     {
         /// @todo: movement control now is a mess, prepare to rewrite
         std::list<FleeInfo>& infoList = AI_VALUE(std::list<FleeInfo>&, "recently flee info");
@@ -2542,8 +2546,8 @@ bool SetBehindTargetAction::Execute(Event event)
         }
     }
     target->GetNearPoint(bot, x, y, z, 0.0f, dist, goodAngle2);
-    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(),
-                                                       bot->GetPositionZ(), x, y, z))
+    if (bot->GetMap()->CheckCollisionAndGetValidCoords(bot, bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 
+        x, y, z))
     {
         std::list<FleeInfo>& infoList = AI_VALUE(std::list<FleeInfo>&, "recently flee info");
         Position pos(x, y, z);
@@ -2556,8 +2560,7 @@ bool SetBehindTargetAction::Execute(Event event)
     if (availablePos.empty())
         return false;
     Position nearest = GetNearestPosition(availablePos);
-    return MoveTo(bot->GetMapId(), nearest.GetPositionX(), nearest.GetPositionY(), nearest.GetPositionZ(), false, false,
-                  false, true, MovementPriority::MOVEMENT_COMBAT);
+    return MoveTo(bot->GetMapId(), nearest.GetPositionX(), nearest.GetPositionY(), nearest.GetPositionZ(), false, false, false, true, MovementPriority::MOVEMENT_COMBAT);
 }
 
 bool MoveOutOfCollisionAction::Execute(Event event)

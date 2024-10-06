@@ -620,7 +620,7 @@ class spell_item_feast : public SpellScript
         {
             LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
 
-            switch(GetSpellInfo()->Id)
+            switch (GetSpellInfo()->Id)
             {
                 case SPELL_GREAT_FEAST:
                     if (BroadcastText const* bct = sObjectMgr->GetBroadcastText(GREAT_FEAST_BROADCAST_TEXT_ID_PREPARE))
@@ -4055,20 +4055,24 @@ enum Skettis
 {
     QUEST_FIRES_OVER_SKETTIS = 11008
 };
+
 class spell_item_skyguard_blasting_charges : public SpellScript
 {
     PrepareSpellScript(spell_item_skyguard_blasting_charges);
+
     void HandleOpenObject(SpellEffIndex effIndex)
     {
         PreventHitDefaultEffect(effIndex);
         if (GameObject* go = GetHitGObj())
             go->UseDoorOrButton();
     }
+
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         if (Unit* kaliri = GetHitUnit())
             kaliri->ToCreature()->DespawnOrUnsummon(0s, 30s);
     }
+
     SpellCastResult CheckQuest()
     {
         if (Player* playerCaster = GetCaster()->ToPlayer())
@@ -4078,6 +4082,7 @@ class spell_item_skyguard_blasting_charges : public SpellScript
         }
         return SPELL_FAILED_DONT_REPORT;
     }
+
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_item_skyguard_blasting_charges::HandleOpenObject, EFFECT_1, SPELL_EFFECT_ACTIVATE_OBJECT);

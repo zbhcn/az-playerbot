@@ -181,12 +181,15 @@ void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
         // Remove all triggered by aura spells vs unlimited duration
         aurEff->CleanupTriggeredSpells(GetTarget());
     }
+    // 检查当前光环是否为命令怒吼或小鬼血之契印
+    bool isCommandingShoutOrBloodPact = (aurEff->GetSpellInfo()->Id == 47440 || aurEff->GetSpellInfo()->Id == 47439 || aurEff->GetSpellInfo()->Id == 469 || aurEff->GetSpellInfo()->Id == 27268);
 
     // Stacking!
     if (uint32 groupId = aurEff->GetAuraGroup())
     {
         SpellGroupStackFlags sFlag = sSpellMgr->GetGroupStackFlags(groupId);
-        if (!aurEff->IsPeriodic() && (sFlag & SPELL_GROUP_STACK_FLAG_EFFECT_EXCLUSIVE))
+        //if (!aurEff->IsPeriodic() && (sFlag & SPELL_GROUP_STACK_FLAG_EFFECT_EXCLUSIVE))
+        if (!isCommandingShoutOrBloodPact && !aurEff->IsPeriodic() && (sFlag & SPELL_GROUP_STACK_FLAG_EFFECT_EXCLUSIVE))
         {
             AuraApplication* strongestApp = apply ? this : nullptr;
             AuraEffect* strongestEff = apply ? aurEff : nullptr;
@@ -1613,7 +1616,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_GENERIC:
                 if (!caster)
                     break;
-                switch(GetId())
+                switch (GetId())
                 {
                     case 61987: // Avenging Wrath
                         // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
@@ -2010,7 +2013,7 @@ bool Aura::IsAuraStronger(Aura const* newAura) const
                 return true;
 
             if (curValue == std::abs(newEffect->GetAmount()))
-                if(!IsPassive() && !IsPermanent() && GetDuration() < newAura->GetDuration())
+                if (!IsPassive() && !IsPermanent() && GetDuration() < newAura->GetDuration())
                     return true;
         }
     }

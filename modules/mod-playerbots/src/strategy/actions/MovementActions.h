@@ -115,6 +115,7 @@ protected:
     int moveInterval;
 };
 
+
 class CombatFormationMoveAction : public MovementAction
 {
 public:
@@ -139,6 +140,7 @@ class TankFaceAction : public CombatFormationMoveAction
 {
 public:
     TankFaceAction(PlayerbotAI* botAI) : CombatFormationMoveAction(botAI, "tank face") {}
+
     bool Execute(Event event) override;
 };
 
