@@ -96,4 +96,3 @@ local.properties
 # ==================
 .cache
 compile_commands.json
-.github/README.md

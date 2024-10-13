@@ -38,8 +38,8 @@ bool ExternalEventHelper::ParseChatCommand(std::string const command, Player* ow
 
     return true;
 }
-//有修改优化性能
-void ExternalEventHelper::HandlePacket(std::unordered_map<uint16, std::string> handlers, WorldPacket const& packet,
+
+void ExternalEventHelper::HandlePacket(std::map<uint16, std::string>& handlers, WorldPacket const& packet,
                                        Player* owner)
 {
     uint16 opcode = packet.GetOpcode();

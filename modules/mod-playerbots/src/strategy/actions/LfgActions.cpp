@@ -13,8 +13,8 @@
 using namespace lfg;
 
 bool LfgJoinAction::Execute(Event event)
-{
-    if (sLFGMgr->GetState(bot->GetGUID()) != LFG_STATE_NONE)
+{  
+    if (sLFGMgr->GetState(bot->GetGUID()) != LFG_STATE_NONE || bot->GetGroup()) //当机器人已经有队伍时不排随机
     {
         return false;   
     }

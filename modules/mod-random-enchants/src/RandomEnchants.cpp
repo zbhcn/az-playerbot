@@ -96,7 +96,7 @@ public:
         uint32 Class = item->GetTemplate()->Class;
 
         if (
-            (Quality > 5 || Quality < 1 || item->GetTemplate()->ItemLevel < 110) /* eliminates enchanting anything that isn't a recognized quality */ ||
+            (Quality > 5 || Quality < 1 || item->GetTemplate()->ItemLevel < 188) /* eliminates enchanting anything that isn't a recognized quality */ ||
             (Class != 2 && Class != 4) /* eliminates enchanting anything but weapons/armor */) {
             return;
         }

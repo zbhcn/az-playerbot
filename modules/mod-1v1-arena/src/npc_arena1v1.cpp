@@ -147,7 +147,7 @@ public:
 
         if (player->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "排队进入1v1竞技场", GOSSIP_SENDER_MAIN, 3, "Are you sure?", 0, false);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "排队进入1v1竞技场", GOSSIP_SENDER_MAIN, 3, "你确定吗?", 0, false);
         }
         else
         {
@@ -156,7 +156,7 @@ public:
 
         if (!teamExistForPlayerGuid(player))
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "创建一个1V1竞技场队伍", GOSSIP_SENDER_MAIN, 1, "Are you sure?", sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 400000), false);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "创建一个1V1竞技场队伍", GOSSIP_SENDER_MAIN, 1, "你确定吗?", sConfigMgr->GetOption<uint32>("Arena1v1.Costs", 400000), false);
         }
         else
         {
@@ -241,12 +241,12 @@ public:
                 if (at)
                 {
                     std::stringstream s;
-                    s << "\nRating: " << at->GetStats().Rating;
-                    s << "\nRank: " << at->GetStats().Rank;
-                    s << "\nSeason Games: " << at->GetStats().SeasonGames;
-                    s << "\nSeason Wins: " << at->GetStats().SeasonWins;
-                    s << "\nWeek Games: " << at->GetStats().WeekGames;
-                    s << "\nWeek Wins: " << at->GetStats().WeekWins;
+                    s << "\n评级: " << at->GetStats().Rating;
+                    s << "\n等级: " << at->GetStats().Rank;
+                    s << "\n赛季场次: " << at->GetStats().SeasonGames;
+                    s << "\n赛季胜利: " << at->GetStats().SeasonWins;
+                    s << "\n周场次: " << at->GetStats().WeekGames;
+                    s << "\n周胜利: " << at->GetStats().WeekWins;
 
                     ChatHandler(player->GetSession()).PSendSysMessage(SERVER_MSG_STRING, s.str().c_str());
                 }

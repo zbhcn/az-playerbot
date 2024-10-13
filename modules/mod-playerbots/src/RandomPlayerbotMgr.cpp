@@ -292,12 +292,8 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool /*minimal*/)
     if (!sPlayerbotAIConfig->randomBotAutologin || !sPlayerbotAIConfig->enabled)
         return;
 
-    if (sPlayerbotAIConfig->enablePrototypePerformanceDiff)
+    if (sPlayerbotAIConfig->botActiveAloneSmartScale)
     {
-        LOG_INFO("playerbots", "---------------------------------------");
-        LOG_INFO("playerbots",
-                 "PROTOTYPE: Playerbot performance enhancements are active. Issues and instability may occur.");
-        LOG_INFO("playerbots", "---------------------------------------");
         ScaleBotActivity();
     }
 
@@ -338,18 +334,17 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool /*minimal*/)
     {
         if (time(nullptr) > (PlayersCheckTimer + 60))
             activateCheckPlayersThread();
-        //LfgCheckTimer = time(nullptr);  // 更新LfgCheckTimer随机战场
     }
 
-    if (sPlayerbotAIConfig->randomBotJoinBG && !players.empty())
+    if (sPlayerbotAIConfig->randomBotJoinBG /* && !players.empty()*/)
     {
-        if (time(nullptr) > (BgCheckTimer + 32))
+        if (time(nullptr) > (BgCheckTimer + 30))
             activateCheckBgQueueThread();
     }
 
-    if (sPlayerbotAIConfig->randomBotJoinLfg && !players.empty())
+    if (sPlayerbotAIConfig->randomBotJoinLfg /* && !players.empty()*/)
     {
-        if (time(nullptr) > (LfgCheckTimer + 31))
+        if (time(nullptr) > (LfgCheckTimer + 30))
             activateCheckLfgQueueThread();
     }
 
@@ -415,8 +410,9 @@ void RandomPlayerbotMgr::ScaleBotActivity()
     // max/min activity
 
     //    % increase/decrease                   wanted diff                                         , avg diff
-    float activityPercentageMod = pid.calculate(
-        sRandomPlayerbotMgr->GetPlayers().empty() ? sPlayerbotAIConfig->diffEmpty : sPlayerbotAIConfig->diffWithPlayer,
+    float activityPercentageMod = pid.calculate(sRandomPlayerbotMgr->GetPlayers().empty() ?
+        sPlayerbotAIConfig->botActiveAloneSmartScaleDiffEmpty :
+        sPlayerbotAIConfig->botActiveAloneSmartScaleDiffWithPlayer,
         sWorldUpdateTime.GetAverageUpdateTime());
 
     activityPercentage = activityPercentageMod + 50;
@@ -1109,6 +1105,9 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 
 bool RandomPlayerbotMgr::ProcessBot(Player* player)
 {
+    if (!player || !player->IsInWorld() || player->IsBeingTeleported() || player->GetSession()->isLogingOut())
+        return false;
+
     uint32 bot = player->GetGUID().GetCounter();
 
     if (player->InBattleground())
