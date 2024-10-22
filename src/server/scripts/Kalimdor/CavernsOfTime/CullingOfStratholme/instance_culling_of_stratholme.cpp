@@ -317,6 +317,9 @@ public:
         {
             switch (GetData(DATA_ARTHAS_EVENT))
             {
+                //修复王子不出来
+                case COS_PROGRESS_START_INTRO:
+                case COS_PROGRESS_CRATES_FOUND:
                 case COS_PROGRESS_FINISHED_INTRO:
                     arthas->UpdatePosition(LeaderIntroPos2, true);
                     arthas->SetHomePosition(LeaderIntroPos2);

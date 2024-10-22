@@ -1450,7 +1450,7 @@ public:
         {
             if (InstanceScript* pInstance = creature->GetInstanceScript())
             {
-                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)
+                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)//修复王子不出现
                 {
                     pInstance->SetData(DATA_ARTHAS_EVENT, COS_PROGRESS_FINISHED_INTRO);
                     if (Creature* arthas = ObjectAccessor::GetCreature(*creature, pInstance->GetGuidData(DATA_ARTHAS)))
@@ -1476,7 +1476,7 @@ public:
     {
         if (pQuest->GetQuestId() == QUEST_A_ROYAL_ESCORT)
             if (InstanceScript* pInstance = creature->GetInstanceScript())
-                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_CRATES_FOUND)
+                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_CRATES_FOUND)//修复王子不出现问题
                     pInstance->SetData(DATA_ARTHAS_EVENT, COS_PROGRESS_START_INTRO);
 
         return true;
