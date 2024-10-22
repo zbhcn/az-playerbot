@@ -64,8 +64,8 @@ public:
 
         void OnPlayerEnter(Player* plr) override
         {
-            //if (instance->GetPlayersCountExceptGMs() == 1)防止阿尔萨斯不出来
-            //    SetData(DATA_ARTHAS_REPOSITION, 2);
+            if (instance->GetPlayersCountExceptGMs() == 1)
+                SetData(DATA_ARTHAS_REPOSITION, 2);
 
             EnsureGridLoaded();
 
